@@ -1,6 +1,8 @@
 <?php
-// session_start();
-require('functions.php');
+session_start();
+require_once 'inc/config.php'; // Added to ensure API_BASE_URL is defined
+require_once 'functions.php';
+require_once 'inc/APIClient.php';
 
 $auth = new auth();
 $file = new files();
@@ -12,32 +14,53 @@ if (!$auth->isLogin()) {
     }
 }
 
-$user_id = $_SESSION['user_id'];
-$user_type = $_SESSION['user_type'];
+$user_id = $_SESSION['user_id'] ?? null;
+$user_type = $_SESSION['user_type'] ?? 0;
 
+// Fetch user name if logged in
 $api = new APIClient();
+$token = $_SESSION['token'] ?? $_COOKIE['token'] ?? null;
+$user_name = 'Guest';
+$is_logged_in = false;
+
+if ($token) {
+    $response = $api->callAPI("/profile", "GET", [], $token);
+    if (isset($response['error'])) {
+        error_log("Profile API Error: " . $response['error']);
+    }
+    if (isset($response['status_code']) && $response['status_code'] == 200 && isset($response['data']['email'])) {
+        $_SESSION['user_name'] = $response['data']['email']; // Use email as name
+        $user_name = htmlspecialchars($_SESSION['user_name']);
+        $is_logged_in = true;
+    } else {
+        error_log("Profile API Response: " . json_encode($response));
+        error_log("Token used: " . $token);
+    }
+} else {
+    error_log("No token found. Session: " . json_encode($_SESSION));
+}
+
 $query = new query();
 $shopAction = new shopAction();
 
-$response = $api->callAPI("/public/categories"); // Example GET request
-$catagories = $response['data']??null;
-// print_r($catagories);
+$response = $api->callAPI("/public/categories");
+$categories = $response['data'] ?? null;
 $get_id = $_GET['id'] ?? null;
 
-if (isset($_GET['action']) && $_GET['action'] == "checkout") {
-    // $shopAction->checkout();
+if (isset($_GET['action']) && $_GET['action'] === "checkout") {
     $order_hash = rndmString(13, "gd_order_");
-    // header("location: razorpay/pay.php?order=$order_hash");
-    // $msg = "checkout are not avalable, we are fixing.";
-    // $msg_class = "alert-danger";
-    // $st_msg = "Sorry";
-}else if(isset($_GET['action']) && $_GET['action'] == "logout"){
-    $token = $_SESSION['token']??$_COOKIE['token']??null;;
-    $response = $api->callAPI("/logout",'POST',[],$token); // Example GET request
-    if($response && ($response['status_code'] == 200)){
-        $msg = $response['message'];
+} elseif (isset($_GET['action']) && $_GET['action'] === "logout") {
+    $token = $_SESSION['token'] ?? $_COOKIE['token'] ?? null;
+    $response = $api->callAPI("/logout", 'POST', [], $token) ?: [];
+    if (($response['status_code'] ?? null) == 200) {
+        $msg = $response['message'] ?? 'Logged out successfully';
         $msg_class = "alert-success";
         $st_msg = "Congratulations";
+        session_destroy();
+        $_SESSION = [];
+        if (isset($_COOKIE['token'])) {
+            setcookie('token', '', time() - 3600, '/');
+        }
     }
 }
 
@@ -46,93 +69,53 @@ if (isset($_GET['download'])) {
     $file->download($p_id);
 }
 
+// Handle add-to-cart via GET
 if (isset($_GET['add_to_cart'])) {
-    $pid = $_GET['add_to_cart'];
-    
-    // $cpd = $query->fetchData("product_meta", "*", "product_id='$pid'");
-    $response = $api->callAPI("/public/products/$pid");
-    $cpd = $response['data']??[];
-
-    if (count($cpd) != 0) {
-        // $caap = $query->fetchData("cart", "*", "user_id='$user_id' and product_id='$pid'");
-        $cartResponse = $api->callAPI("/api/cart/view");
-        $caap = $cartResponse['data']??[];
-        // MyLog('សារប្រតិបត្តិការ 2 '.json_encode($caap));
-
-        if (count($caap) == 0) {
-            // $data = ["product_id" => $pid, "user_id" => $user_id,  "price" => $cpd['priceUSD'], "user_type" => $user_type];
-            // $q = $query->insertData("cart", $data);
-            // MyLog('សារប្រតិបត្តិការ 1 '.json_encode($data));
-            $token = $_SESSION['token']??$_COOKIE['token']??null;;
-            $data = ["product_id" => $pid, "quantity"=>1];
-            
-            $response = $api->callAPI("/cart/add",'POST',$data,$token); // Example GET request
-            // MyLog('សារប្រតិបត្តិការ 3 '.json_encode($response));
-            if($response && ($response['status_code'] == 200)){
-                $msg = "Product added to your cart successfully";
-                $msg_class = "alert-success";
-                $st_msg = "Congratulations";
-            }else{
-                $msg = "Product add to your cart feiled";
-                $msg_class = "alert-danger";
-                $st_msg = "Sorry";
-            }
-            
-        } else {
-            $msg = "This product is already available in your Cart";
-            $msg_class = "alert-danger";
-            $st_msg = "Sorry";
-        }
-    }
-}
-
-if (isset($_GET['remove_cart'])) {
-    $pid = $_GET['remove_cart'];
-    // $cart_check = $query->fetchData("cart", "*", "user_id='$user_id' and product_id='$pid'");
-    $cartResponse = $api->callAPI("/api/cart/view");
-    $cart_check = $cartResponse['data']??[];
-    if (count($cart_check) != 0) {
-        $msg = "That product is not in your cart";
-        $msg_class = "alert-danger";
-        $st_msg = "Dear";
+    $pid = (int) $_GET['add_to_cart'];
+    $data = ['product_id' => $pid, 'quantity' => 1];
+    $resp = $api->callAPI('/cart/add', 'POST', $data, $token) ?: [];
+    if (($resp['status_code'] ?? 0) === 200) {
+        $msg = 'Product added to your cart successfully';
+        $msg_class = 'alert-success';
+        $st_msg = 'Congratulations';
     } else {
-        // $q = $query->dropData("cart", "user_id='$user_id' and product_id='$pid'");
-        $token = $_SESSION['token']??$_COOKIE['token']??null;;
-        $response = $api->callAPI("/cart/remove/$pid", 'DELETE', [], $token); // Example GET request
-        // MyLog('សារប្រតិបត្តិការ 3 '.json_encode($response));
-        // MyLog('សារប្រតិបត្តិការ 4 '.json_encode($pid));
-        if($response && ($response['status_code'] === 200)){
-            $msg = "Product removed from your cart";
-            $msg_class = "alert-success";
-            $st_msg = "Ok";
-            header("location: product-details.php");
-
-        }else{
-            $msg = "Product removed from your cart feiled";
-            $msg_class = "alert-danger";
-            $st_msg = "Sorry";
-            header("location: product-details.php");
-
-        }
-        
+        $msg = $resp['message'] ?? 'Failed to add product to cart';
+        $msg_class = 'alert-danger';
+        $st_msg = 'Sorry';
     }
 }
 
+// Handle remove-from-cart via GET
+if (isset($_GET['remove_cart'])) {
+    $pid = (int) $_GET['remove_cart'];
+    $data = ['product_id' => $pid];
+    $resp = $api->callAPI('/cart/remove', 'POST', $data, $token) ?: [];
+    if (($resp['status_code'] ?? 0) === 200) {
+        $msg = 'Product removed from your cart';
+        $msg_class = 'alert-success';
+        $st_msg = 'Done';
+    } else {
+        $msg = $resp['message'] ?? 'Failed to remove product from cart';
+        $msg_class = 'alert-danger';
+        $st_msg = 'Sorry';
+    }
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?msg=msg');
+    exit;
+}
 
-
-$token = $_SESSION['token']??$_COOKIE['token']??null;;
-$cartResponse = $api->callAPI("/cart/view",'GET',[],$token); // Example GET request
-$cart_data = $cartResponse['data'] ??[];
-$cart_count = count($cart_data);
-
-// $cart_count = count($query->fetchData("cart", "*", "user_id='$user_id'"));
+$token = $_SESSION['token'] ?? $_COOKIE['token'] ?? null;
+// Fetch cart contents & compute badge count
+$cartResp = $api->callAPI('/cart/view', 'GET', [], $token);
+$cart_data = $cartResp['data'] ?? [];
+$cart_count = array_sum(array_column($cart_data, 'quantity'));
 ?>
+
 <!doctype html>
 <html class="no-js" lang="zxx">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Digital Store </title>
+    <title>Digital Store</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" type="image/x-icon" href="assets/img/logo/Online-store.png">
@@ -149,8 +132,35 @@ $cart_count = count($cart_data);
     <link rel="stylesheet" href="assets/css/default.css">
     <link rel="stylesheet" href="assets/css/style.css">
 
+    <style>
+        .btn-outline-secondary {
+            background-color: white;
+            color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+        .dropdown-menu {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            display: none;
+        }
+        .dropdown-menu.show {
+            display: block !important;
+        }
+        .dropdown-item {
+            color: #212529;
+            display: block;
+        }
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+    </style>
+
     <script src="./assets/js/khqr-1.0.16.min.js"></script>
-    <!-- <script src="https://github.com/davidhuotkeo/bakong-khqr/releases/download/bakong-khqr-1.0.6/khqr-1.0.6.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </head>
 
@@ -158,8 +168,6 @@ $cart_count = count($cart_data);
     <!--[if lte IE 9]>
       <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
       <![endif]-->
-
-    <!-- Add your site or application content here -->
 
     <!-- pre loader area start -->
     <div id="loading">
@@ -199,53 +207,37 @@ $cart_count = count($cart_data);
                         <div class="main-menu">
                             <nav id="mobile-menu">
                                 <ul>
-                                    <li class="has-dropdown- <?php echo ($get_id==null ? 'active' : '') ?>">
+                                    <li class="has-dropdown- <?php echo ($get_id == null ? 'active' : ''); ?>">
                                         <a href="index.php">Home</a>
-                                        <!-- <ul class="submenu">
-                                            <li><a href="index.php">Home Wordpress</a></li>
-                                            <li><a href="index-2.php">Home Plugins</a></li>
-                                        </ul> -->
                                     </li>
                                     <?php
-                                    if($catagories)
-                                    foreach ($catagories as $key => $value) {
-                                        // កាត់ចំណងជើង និង excerpt
-                                        $catagory_id = $value['id']??null;
-                                        $name = $value['name'] ?? 'catagory_name';
-                                        // Generate HTML
-                                        echo '<li class="'.($get_id==$catagory_id ? 'active' : '').'"><a href="product.php?id=' . $value['id'] . '">'.$name.'</a></li>';
+                                    if ($categories) {
+                                        foreach ($categories as $key => $value) {
+                                            $category_id = $value['id'] ?? null;
+                                            $name = $value['name'] ?? 'category_name';
+                                            echo '<li class="' . ($get_id == $category_id ? 'active' : '') . '"><a href="product.php?id=' . $value['id'] . '">' . $name . '</a></li>';
+                                        }
+                                    } else {
+                                        echo '<li class="has-dropdown">
+                                                <a href="product.php">Themes</a>
+                                                <ul class="submenu">
+                                                    <li><a href="product.php">Product</a></li>
+                                                    <li><a href="product-details.php">Product Details</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="product.php">HTML</a></li>
+                                            <li class="has-dropdown">
+                                                <a href="product.php">pages</a>
+                                                <ul class="submenu">
+                                                    <li><a href="about.php">About</a></li>
+                                                    <li><a href="documentation.php">Documentation</a></li>
+                                                    <li><a href="pricing.php">Pricing</a></li>
+                                                    <li><a href="sign-up.php">Sign Up</a></li>
+                                                    <li><a href="sign-in.php">Log In</a></li>
+                                                </ul>
+                                            </li>';
                                     }
-                                    else
-                                    echo `<li class="has-dropdown">
-                                            <a href="product.php">Themes</a>
-                                            <ul class="submenu">
-                                                <li><a href="product.php">Product</a></li>
-                                                <li><a href="product-details.php">Product Details</a></li>
-                                            </ul>
-                                        </li>
-                                        <li><a href="product.php">HTML</a></li>
-                                        <!-- <li><a href="support.php">Support</a></li> -->
-                                        <li class="has-dropdown">
-                                            <a href="product.php">pages</a>
-
-                                            <ul class="submenu">
-                                                <li><a href="about.php">About</a></li>
-                                                <li><a href="documentation.php">Documentation</a></li>
-                                                <li><a href="pricing.php">Pricing</a></li>
-                                                <li><a href="sign-up.php">Sign Up</a></li>
-                                                <li><a href="sign-in.php">Log In</a></li>
-                                            </ul>
-                                        </li>`;
                                     ?>
-                                    
-                                    <li class="has-dropdown d-none">
-                                        <a href="blog.php">Blog</a>
-
-                                        <ul class="submenu">
-                                            <li><a href="blog.php">Blog</a></li>
-                                            <li><a href="blog-details.php">Blog Details</a></li>
-                                        </ul>
-                                    </li>
                                     <li><a href="contact.php" class="">Contact</a></li>
                                 </ul>
                             </nav>
@@ -253,15 +245,33 @@ $cart_count = count($cart_data);
                     </div>
                     <div class="col-xxl-2 col-xl-2 col-lg-2 col-md-8 col-6">
                         <div class="header__action d-flex align-items-center justify-content-end">
-
                             <div class="header__login d-none d-sm-block">
-                                <?php if ($auth->isLogin()) {
-                                    echo "<a href=\"account\"><i class=\"far fa-user\"></i>Account</a>";
-                                } else {
-
-                                    echo "<a href=\"sign-in.php\"><i class=\"far fa-unlock\"></i> Log In</a>";
-                                } ?>
-
+                                <?php if ($is_logged_in): ?>
+                                  <div class="user-account d-flex align-items-center">
+                                    <span class="mr-2">Welcome, <strong><?= htmlspecialchars($user_name, ENT_QUOTES) ?></strong></span>
+                                    <div class="dropdown">
+                                      <button
+                                        class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                        type="button"
+                                        id="userMenuButton"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"
+                                      >
+                                        <i class="far fa-user-circle"></i>
+                                      </button>
+                                      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenuButton">
+                                        <a class="dropdown-item" href="?action=logout">
+                                          <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                                        </a>
+                                      </div>
+                                    </div>
+                                  </div>
+                                <?php else: ?>
+                                  <a href="sign-in.php" class="btn btn-outline-primary btn-sm">
+                                    <i class="far fa-unlock mr-1"></i> Log In
+                                  </a>
+                                <?php endif; ?>
                             </div>
                             <div class="header__cart d-none d-sm-block">
                                 <a href="javascript:void(0);" class="cart-toggle-btn">
@@ -277,7 +287,6 @@ $cart_count = count($cart_data);
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -288,41 +297,38 @@ $cart_count = count($cart_data);
         if ($_GET["msg"] != "msg") {
             $msg = $_GET["msg"];
             $msg_class = "alert-success";
-            
         }
-      //MyLog('សារប្រតិបត្តិការ 32 '.json_encode($_GET["msg"]));
 
-        if ($_GET['msg'] == "order successful"){
-    
-            $token = $_SESSION['token']??$_COOKIE['token']??null;;
-            $response = $api->callAPI("/cart/place-order", 'POST', [], $token); // Example GET request
-          //MyLog('សារប្រតិបត្តិការ 33 '.json_encode($response));
-        
-            if($response && ($response['status_code'] === 200)){
+        if ($_GET['msg'] == "order successful") {
+            $token = $_SESSION['token'] ?? $_COOKIE['token'] ?? null;
+            $response = $api->callAPI("/cart/place-order", 'POST', [], $token);
+            if ($response && $response['status_code'] === 200) {
                 header("location: index.php?msg=msg");
                 $_SESSION['msg'] = $msg = "Order successfully. Thank you for order, View more in your account.";
                 $_SESSION['msg_class'] = $msg_class = "alert-success";
                 $_SESSION['st_msg'] = $st_msg = "Congratulations";
-
-            }else{
+            } else {
                 header("location: index.php?msg=msg");
-                $_SESSION['msg'] = $msg = "Order feiled";
+                $_SESSION['msg'] = $msg = "Order failed";
                 $_SESSION['msg_class'] = $msg_class = "alert-danger";
                 $_SESSION['st_msg'] = $st_msg = "Sorry";
-        
             }
         }
 
-        $st_msg = $st_msg ?? (isset($_SESSION['st_msg']) ? $_SESSION['st_msg']: '' );
-        $msg_class = $msg_class ?? (isset($_SESSION['msg_class']) ? $_SESSION['msg_class']: '');
-        $msg = $msg ?? (isset($_SESSION['msg']) ? $_SESSION['msg']: '');
+        $st_msg = $st_msg ?? (isset($_SESSION['st_msg']) ? $_SESSION['st_msg'] : '');
+        $msg_class = $msg_class ?? (isset($_SESSION['msg_class']) ? $_SESSION['msg_class'] : '');
+        $msg = $msg ?? (isset($_SESSION['msg']) ? $_SESSION['msg'] : '');
 
         $html = "<div class=\"alert {$msg_class} alert-dismissible\">
-            <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
+            <button type=\"button\" class=\"close\" data-dismiss=\"alert\">×</button>
             <strong>{$st_msg}!</strong> {$msg}
           </div>";
         echo $html;
     }
     ?>
+    <script src="./assets/js/khqr-1.0.16.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

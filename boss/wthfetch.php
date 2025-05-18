@@ -1,38 +1,12 @@
 <?php
-session_start();
-ob_start();
-// class database
-// {
-//     private $database;
-//     private $host;
-//     private $user;
-//     private $pass;
-//     protected function connect()
-//     {
-//         $this->database = "digi";
-//         $this->host = "localhost";
-//         $this->user = "root";
-//         $this->pass = "";
-//         $db = "mysql:host={$this->host};dbname={$this->database}";
-//         $con = new PDO($db, $this->user, $this->pass);
-//         if (!$con) {
-//             die('database connection error');
-//         } else {
-//             return $con;
-//         }
-//     }
-// }
-
-// session_start();
-// ob_start();
-
+// Remove redundant session_start() and ob_start() since they’re handled elsewhere
 class APIClient
 {
     private $api_url;
 
     public function __construct()
     {
-        $this->api_url = "http://178.128.123.241/api"; // Replace with your actual API URL
+        $this->api_url = "http://127.0.0.1:8000/api"; // Match local development server
     }
 
     public function callAPI($endpoint, $method = "GET", $data = [], $token = null)
@@ -71,11 +45,4 @@ class APIClient
 
         return json_decode($response, true);
     }
-
 }
-
-// // Example Usage:
-// $api = new APIClient();
-// $response = $api->callAPI("/get-data"); // Example GET request
-// print_r($response);
-// ?>

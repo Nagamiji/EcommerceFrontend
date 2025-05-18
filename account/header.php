@@ -1,82 +1,92 @@
 <?php
-require('../functions.php');
+session_start();
+require("../functions.php");
 
 $auth = new auth();
-$file = new files();
-$shopAction = new shopAction();
+$api = new APIClient();
+$token = $_SESSION['token'] ?? $_COOKIE['token'] ?? null;
 
+// Fetch user data if token exists but not logged in
+if ($token && !$auth->isLogin()) {
+    $userResponse = $api->callAPI("/user", 'GET', [], $token);
+    if (isset($userResponse['data']['user'])) {
+        $_SESSION['user_login'] = $userResponse['data']['user']['name'] ?? 'User';
+        $_SESSION['user_id'] = $userResponse['data']['user']['id'] ?? null;
+    } else {
+        unset($_SESSION['token']);
+        setcookie('token', '', time() - 3600, '/');
+    }
+}
+
+// Redirect to sign-in if not logged in
 if (!$auth->isLogin()) {
-    header("location:../sign-in.php");
-    exit();
-}
-
-if (isset($_GET['action']) && $_GET['action'] == "logout") {
-    unset($_SESSION['user_login']);
-    unset($_SESSION['user_id']);
     header("Location: ../sign-in.php");
-    exit();
-}
-
-if (isset($_GET['download'])) {
-    $p_id = $_GET['download'];
-    $file->download($p_id);
+    exit;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Digital Store </title>
-    <meta name="robots" content="noindex, follow" />
-    <meta name="description"
-        content="Mr.Bara Multipurpose eCommerce Bootstrap 5 Template is a stunning e-commerce website template that is the best choice for any online store.">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="profile" href="https://gmpg.org/xfn/11">
-    <link rel="canonical" href="https://htmldemo.hasthemes.com/mrbara/index.html" />
-
-    <!-- Open Graph (OG) meta tags are snippets of code that control how URLs are displayed when shared on social media  -->
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Mr.Bara - Multipurpose eCommerce HTML Template" />
-    <meta property="og:url" content="https://htmldemo.hasthemes.com/mrbara/index.html" />
-    <meta property="og:site_name" content="Mr.Bara - Multipurpose eCommerce HTML Template" />
-    <!-- For the og:image content, replace the # with a link of an image -->
-    <meta property="og:image" content="#" />
-    <meta property="og:description"
-        content="Mr.Bara Multipurpose eCommerce Bootstrap 5 Template is a stunning e-commerce website template that is the best choice for any online store." />
-    <!-- Add site Favicon -->
-    <link rel="icon" href="assets/images/favicon/cropped-favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" href="assets/images/favicon/cropped-favicon-192x192.png" sizes="192x192" />
-    <link rel="apple-touch-icon" href="assets/images/favicon/cropped-favicon-180x180.png" />
-    <meta name="msapplication-TileImage" content="assets/images/favicon/cropped-favicon-270x270.png" />
-
-    <!-- All CSS is here
-	============================================ -->
-    <link rel="stylesheet" href="assets/css/vendor/bootstrap.min.css" />
-    <link rel="stylesheet" href="assets/css/vendor/font-awesome.min.css" />
-    <link rel="stylesheet" href="assets/css/vendor/ionicons.min.css" />
-    <link rel="stylesheet" href="assets/css/vendor/eleganticons.css" />
-    <link rel="stylesheet" href="assets/css/plugins/select2.min.css" />
-    <link rel="stylesheet" href="assets/css/plugins/nice-select.css" />
-    <link rel="stylesheet" href="assets/css/plugins/animate.css" />
-    <link rel="stylesheet" href="assets/css/plugins/swiper.min.css" />
-    <link rel="stylesheet" href="assets/css/plugins/magnific-popup.css" />
-    <link rel="stylesheet" href="assets/css/plugins/easyzoom.css" />
-    <link rel="stylesheet" href="assets/css/plugins/slinky.css" />
-    <link rel="stylesheet" href="assets/css/plugins/jquery-ui.css" />
-    <link rel="stylesheet" href="assets/css/plugins/jquery.mb.ytplayer.min.css" />
-    <link rel="stylesheet" href="assets/css/style.css" />
-
-    <link rel="stylesheet" href="../assets/css/fontAwesome5Pro.css">
-
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Digital Store</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/slick.css">
+    <link rel="stylesheet" href="/assets/css/meanmenu.css">
+    <link rel="stylesheet" href="/assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="/assets/css/animate.min.css">
+    <link rel="stylesheet" href="/assets/css/backToTop.css">
+    <link rel="stylesheet" href="/assets/css/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/assets/css/fontAwesome5Pro.css">
+    <link rel="stylesheet" href="/assets/css/elegantFont.css">
+    <link rel="stylesheet" href="/assets/css/default.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-
-
-
-
-<body class="select-border-none">
-    <div class="main-wrapper main-wrapper-2">
+<body>
+    <!-- Header Content (e.g., navigation, logo) -->
+    <header>
+        <div class="header-top">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <div class="header-contact">
+                            <ul>
+                                <li><i class="far fa-envelope"></i> support@digitalstore.com</li>
+                                <li><i class="far fa-phone"></i> +1-123-456-7890</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="header-action">
+                            <ul>
+                                <li><a href="/account">My Account</a></li>
+                                <li><a href="?action=logout">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header-bottom">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-2">
+                        <div class="logo">
+                            <a href="/index.php"><img src="/assets/img/logo/Online-store.png" alt="Logo"></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <!-- Navigation Menu (if any) -->
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="header-action">
+                            <a href="cart.php" class="cart-toggle-btn"><i class="far fa-shopping-cart"></i> <span id="cart-count">0</span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

@@ -62,7 +62,6 @@
                         <div class="contact__map d-flex">
                            <!-- <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.4781197396497!2d104.92751731539378!3d11.56210899210271!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31095164d0deffb7%3A0xa0cc1982d50be5a1!2sPhnom%20Penh%2C%20Cambodia!5e0!3m2!1sen!2sus!4v1617728495854!5m2!1sen!2sus"></iframe> -->
                             <img class="p-2" style="width: 50%; height: 50%;" src="assets/img/testimonial/git.png" alt="">
-                            <img class="p-2" style="width: 50%; height: 50%;" src="assets/img/testimonial/qr.png" alt="">
                         </div>
                      </div>
                      

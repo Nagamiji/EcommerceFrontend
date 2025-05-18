@@ -1,5 +1,11 @@
 {
     "require": {
-        "monolog/monolog": "^3.8"
+        "monolog/monolog": "^3.8",
+        "paypal/rest-api-sdk-php": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "inc/"
+        }
     }
 }

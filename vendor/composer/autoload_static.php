@@ -15,6 +15,10 @@ class ComposerStaticInitf4af1b09b9b5e56ef8deef13d74f0bdf
         array (
             'Monolog\\' => 8,
         ),
+        'A' => 
+        array (
+            'App\\' => 4,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -25,6 +29,20 @@ class ComposerStaticInitf4af1b09b9b5e56ef8deef13d74f0bdf
         'Monolog\\' => 
         array (
             0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
+        ),
+        'App\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/inc',
+        ),
+    );
+
+    public static $prefixesPsr0 = array (
+        'P' => 
+        array (
+            'PayPal' => 
+            array (
+                0 => __DIR__ . '/..' . '/paypal/rest-api-sdk-php/lib',
+            ),
         ),
     );
 
@@ -37,6 +55,7 @@ class ComposerStaticInitf4af1b09b9b5e56ef8deef13d74f0bdf
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitf4af1b09b9b5e56ef8deef13d74f0bdf::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitf4af1b09b9b5e56ef8deef13d74f0bdf::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitf4af1b09b9b5e56ef8deef13d74f0bdf::$prefixesPsr0;
             $loader->classMap = ComposerStaticInitf4af1b09b9b5e56ef8deef13d74f0bdf::$classMap;
 
         }, null, ClassLoader::class);
