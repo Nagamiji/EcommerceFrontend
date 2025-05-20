@@ -30,7 +30,6 @@ $category = isset($p_data['category']['name']) ? htmlspecialchars($p_data['categ
 $date = isset($p_data['created_at']) ? date("F j, Y", strtotime($p_data['created_at'])) : 'N/A';
 $update_date = isset($p_data['updated_at']) ? date("F j, Y", strtotime($p_data['updated_at'])) : 'N/A';
 $image = isset($p_data['image_url']) ? "http://127.0.0.1:8000/storage/" . htmlspecialchars($p_data['image_url']) : 'assets/img/banner/sidebar-banner.jpg';
-$additional_images = isset($p_data['images']) ? $p_data['images'] : [];
 ?>
 
 <!-- cart mini area start -->
@@ -49,14 +48,14 @@ $additional_images = isset($p_data['images']) ? $p_data['images'] : [];
     <section class="page__title-area pt-85">
         <div class="container">
             <div class="row">
-                <div class="col-xxl-12">
-                    <div class="page__title-content mb-50">
-                        <h2 class="page__title"><?php echo $title; ?></h2>
+                <div class="col-12">
+                    <div class="page__title-content mb-50 text-center">
+                        <h2 class="page__title text-white"><?php echo $title; ?></h2>
                         <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="index.php">Home</a></li>
-                                <li class="breadcrumb-item"><a href="product.php">Product</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Current</li>
+                            <ol class="breadcrumb justify-content-center">
+                                <li class="breadcrumb-item"><a href="index.php" class="text-white">Home</a></li>
+                                <li class="breadcrumb-item"><a href="product.php" class="text-white">Product</a></li>
+                                <li class="breadcrumb-item active text-primary" aria-current="page">Current</li>
                             </ol>
                         </nav>
                     </div>
@@ -67,80 +66,33 @@ $additional_images = isset($p_data['images']) ? $p_data['images'] : [];
     <!-- page title end -->
 
     <!-- product area start -->
-    <section class="product__area pb-115">
+    <section class="product__area pb-120">
         <div class="container">
-            <div class="row">
-                <div class="col-xxl-8 col-xl-8 col-lg-8">
-                    <div class="product__wrapper">
-                        <div class="product__details-thumb w-img mb-30">
-                            <img src="<?php echo $image; ?>" alt="product-details">
-                        </div>
-                        <?php if (!empty($additional_images)): ?>
-                            <div class="row">
-                                <?php foreach ($additional_images as $img): ?>
-                                    <div class="col-4">
-                                        <img class="img-fluid" src="http://127.0.0.1:8000/storage/<?php echo htmlspecialchars($img['image_url']); ?>" alt="Additional Image">
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-                        <div class="product__details-content">
-                            <div class="product__tab mb-40">
-                                <ul class="nav nav-tabs" id="proTab" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="product__tab-content">
-                                <div class="tab-content" id="proTabContent">
-                                    <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-                                        <div class="product__overview">
-                                            <h3 class="product__overview-title">Product Details</h3>
-                                            <p><?php echo $description; ?></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="product__image-wrapper">
+                        <div class="product__main-image">
+                            <img src="<?php echo $image; ?>" alt="<?php echo $title; ?>" class="img-fluid rounded shadow-sm">
                         </div>
                     </div>
                 </div>
-                <div class="col-xxl-4 col-xl-4 col-lg-4">
-                    <div class="product__details-sidebar ml-30">
-                        <div class="product__proprietor white-bg mb-30">
-                            <div class="product__proprietor-head mb-25">
-                                <div class="product__prorietor-info mb-20 d-flex justify-content-between">
-                                    <div class="product__proprietor-avater d-flex align-items-center">
-                                        <div class="product__proprietor-thumb">
-                                            <img src="assets/img/product/proprietor/profile.png" alt="">
-                                        </div>
-                                        <div class="product__proprietor-name">
-                                            <h5><a href="#"><?php echo $seller; ?></a></h5>
-                                            <a href="#">View Profile</a>
-                                        </div>
-                                    </div>
-                                    <div class="product__proprietor-price">
-                                        <span class="d-flex align-items-start">$<?php echo $price; ?></span>
-                                    </div>
-                                </div>
-                                <div class="product__proprietor-text">
-                                    <p>Pay once and get lifetime free updates.</p>
-                                </div>
-                            </div>
-                            <div class="product__proprietor-body fix">
-                                <ul class="mb-10 fix">
-                                    <li>
-                                        <h6>Released On:</h6>
-                                        <span><?php echo $date; ?></span>
-                                    </li>
-                                    <li>
-                                        <h6>Last Update:</h6>
-                                        <span><?php echo $update_date; ?></span>
-                                    </li>
-                                </ul>
-                                <button class="m-btn m-btn-2 add-to-cart" data-product-id="<?php echo $p_id; ?>">Add to Cart</button>
-                                <button class="m-btn m-btn-2 remove-from-cart" data-product-id="<?php echo $p_id; ?>" style="display: none;">Remove from Cart</button>
-                            </div>
+                <div class="col-lg-6">
+                    <div class="product__details-sidebar p-4 bg-light rounded">
+                        <h3 class="product__title mb-3"><?php echo $title; ?></h3>
+                        <div class="product__price mb-4 text-success fw-bold fs-4">$<?php echo $price; ?></div>
+                        <div class="product__seller mb-3">
+                            <p class="mb-1"><strong>Seller:</strong> <?php echo $seller; ?></p>
+                            <a href="#" class="text-primary">View Profile</a>
+                        </div>
+                        <div class="product__meta mb-4">
+                            <p class="mb-1"><strong>Released On:</strong> <?php echo $date; ?></p>
+                            <p><strong>Last Updated:</strong> <?php echo $update_date; ?></p>
+                        </div>
+                        <p class="product__description mb-4"><?php echo $description; ?></p>
+                        <div class="product__actions">
+                            <button class="m-btn add-to-cart mb-2" data-product-id="<?php echo $p_id; ?>">Add to Cart</button>
+                            <button class="m-btn remove-from-cart" data-product-id="<?php echo $p_id; ?>" style="display: none;">Remove from Cart</button>
+                            <p class="text-muted small mt-2">Pay once and get lifetime free updates.</p>
                         </div>
                     </div>
                 </div>
@@ -150,45 +102,37 @@ $additional_images = isset($p_data['images']) ? $p_data['images'] : [];
     <!-- product area end -->
 
     <!-- trending area start -->
-    <section class="trending__area pt-110 pb-110 grey-bg">
+    <section class="trending__area pt-100 pb-100 bg-gray-100">
         <div class="container">
-            <div class="row align-items-end">
-                <div class="col-xxl-6 col-xl-6 col-lg col-md-8">
-                    <div class="section__title-wrapper mb-50">
-                        <h2 class="section__title">Trending Products</h2>
+            <div class="row">
+                <div class="col-12">
+                    <div class="section__title text-center mb-60">
+                        <h2 class="section__title-text">Trending Products</h2>
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row g-4">
                 <?php
-                foreach ($related_products as $key => $value) {
+                foreach (array_slice($related_products, 0, 3) as $key => $value) { // Limit to 3 related products
                     $product_title = isset($value['name']) ? mb_substr($value['name'], 0, 30) . ".." : "Untitled";
                     $price = isset($value['price']) ? number_format($value['price'], 2) : '0.00';
                     $category = isset($value['category']['name']) ? htmlspecialchars($value['category']['name']) : 'N/A';
                     $image_url = isset($value['image_url']) ? "http://127.0.0.1:8000/storage/" . htmlspecialchars($value['image_url']) : 'assets/img/banner/sidebar-banner.jpg';
 
-                    echo '<div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6">
-                        <div class="trending__item d-sm-flex white-bg mb-30 wow fadeInUp" data-wow-delay=".3s">
-                            <div class="trending__thumb mr-25">
-                                <div class="trending__thumb-inner fix">
-                                    <a href="product-details.php?id=' . $value['id'] . '">
-                                        <img src="' . $image_url . '" alt="" class="product_img_102">
-                                    </a>
-                                </div>
+                    echo '<div class="col-md-4">
+                        <div class="trending__item bg-white p-3 rounded shadow-sm">
+                            <div class="trending__thumb mb-3">
+                                <a href="product-details.php?id=' . $value['id'] . '">
+                                    <img src="' . $image_url . '" alt="' . $product_title . '" class="img-fluid rounded">
+                                </a>
                             </div>
-                            <div class="trending__content">
-                                <h3 class="trending__title"><a href="product-details.php?id=' . $value['id'] . '">' . $product_title . '</a></h3>
-                                <p>Click to see full information.</p>
-                                <div class="trending__meta d-flex justify-content-between">
-                                    <div class="trending__tag">
-                                        <a href="product.php?category=' . $category . '">' . $category . '</a>
-                                    </div>
-                                    <div class="trending__price">
-                                        <span>$' . $price . '</span>
-                                    </div>
-                                </div>
-                                <button class="m-btn m-btn-2 add-to-cart" data-product-id="' . $value['id'] . '">Add to Cart</button>
+                            <h4 class="trending__title mb-2"><a href="product-details.php?id=' . $value['id'] . '">' . $product_title . '</a></h4>
+                            <p class="text-muted mb-2">Click to see full information.</p>
+                            <div class="trending__meta d-flex justify-content-between align-items-center">
+                                <span class="trending__category text-primary">' . $category . '</span>
+                                <span class="trending__price text-success">$' . $price . '</span>
                             </div>
+                            <button class="m-btn w-100 mt-2 add-to-cart" data-product-id="' . $value['id'] . '">Add to Cart</button>
                         </div>
                     </div>';
                 }
@@ -199,25 +143,18 @@ $additional_images = isset($p_data['images']) ? $p_data['images'] : [];
     <!-- trending area end -->
 
     <!-- subscribe area start -->
-    <section class="subscribe__area p-relative pt-100 pb-110" data-background="assets/img/bg/subscribe-bg.jpg">
-        <div class="subscribe__icon">
-            <img class="ps" src="assets/img/icon/subscribe/ps.png" alt="">
-            <img class="wp" src="assets/img/icon/register/pr.png" alt="">
-            <img class="html" src="assets/img/icon/register/AI.png" alt="">
-            <img class="f" src="assets/img/icon/subscribe/f.png" alt="">
-            <img class="man" src="assets/img/icon/subscribe/man.png" alt="">
-        </div>
+    <section class="subscribe__area pt-100 pb-100" style="background-image: url('assets/img/bg/subscribe-bg.jpg');">
         <div class="container">
             <div class="row">
-                <div class="col-xxl-12">
-                    <div class="subscribe__content text-center wow fadeInUp" data-wow-delay=".5s">
-                        <h3 class="subscribe__title">Want to be a seller? <br> Create your account now.</h3>
-                        <p>Try our website for FREE!</p>
-                        <div class="subscribe__form wow fadeInUp" data-wow-delay=".7s">
+                <div class="col-12">
+                    <div class="subscribe__content text-center text-white">
+                        <h3 class="subscribe__title mb-3">Want to be a seller? <br> Create your account now.</h3>
+                        <p class="mb-4">Try our website for FREE!</p>
+                        <div class="subscribe__form">
                             <form action="#">
-                                <button type="submit" class="m-btn m-btn-black"><span></span> register</button>
+                                <button type="submit" class="m-btn m-btn-black"><span></span> Register</button>
                             </form>
-                            <p>Join 20+ other sellers in our Markit community.</p>
+                            <p class="text-white-50 mt-2">Join 20+ other sellers in our Markit community.</p>
                         </div>
                     </div>
                 </div>
@@ -260,6 +197,7 @@ $additional_images = isset($p_data['images']) ? $p_data['images'] : [];
 <!-- Add JavaScript for Cart Functionality -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script> <!-- Add Font Awesome for spinner -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '<?php echo API_BASE_URL ?? 'http://127.0.0.1:8000/api'; ?>';
@@ -287,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const productId = e.target.getAttribute('data-product-id');
             if (!productId) {
                 console.error('No product ID found on button');
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No product ID found.' });
                 return;
             }
             if (!token) {
@@ -304,41 +243,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 return;
             }
+            e.target.disabled = true;
+            e.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
             try {
                 const response = await axios.post(`${API_BASE_URL}/cart/add`, { product_id: productId, quantity: 1 }, {
-                    headers: { 
-                        Authorization: `Bearer ${token}`, 
-                        'Accept': 'application/json', 
-                        'Content-Type': 'application/json' 
-                    }
+                    headers: { Authorization: `Bearer ${token}`, 'Accept': 'application/json', 'Content-Type': 'application/json' }
                 });
-                if (response.data.status_code === 200) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: response.data.message
-                    });
+                if (response.data && response.data.status_code === 200) {
+                    Swal.fire({ icon: 'success', title: 'Success!', text: response.data.message || 'Product added to cart successfully' });
+                    e.target.style.backgroundColor = '#28a745';
                     updateCartCount();
                     updateCartView();
-                    // Show Remove button after adding
                     const removeBtn = button.nextElementSibling;
                     if (removeBtn && removeBtn.classList.contains('remove-from-cart')) {
                         removeBtn.style.display = 'inline-block';
                     }
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.data.message || 'Failed to add to cart'
-                    });
+                    Swal.fire({ icon: 'error', title: 'Error', text: response.data.message || 'Failed to add to cart' });
                 }
             } catch (error) {
                 console.error('Add to Cart Error:', error.response ? error.response.data : error.message);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred. Please check the console for details.'
-                });
+                Swal.fire({ icon: 'error', title: 'Error', text: 'An error occurred. Please check the console for details.' });
+            } finally {
+                e.target.disabled = false;
+                e.target.innerHTML = 'Add to Cart';
+                e.target.style.backgroundColor = '';
             }
         });
     });
@@ -352,48 +281,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (!token) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Login Required',
-                    text: 'Please log in to remove items from your cart.'
-                });
+                Swal.fire({ icon: 'warning', title: 'Login Required', text: 'Please log in to remove items from your cart.' });
                 return;
             }
             try {
                 const response = await axios.post(`${API_BASE_URL}/cart/remove`, { product_id: productId }, {
-                    headers: { 
-                        Authorization: `Bearer ${token}`, 
-                        'Accept': 'application/json', 
-                        'Content-Type': 'application/json' 
-                    }
+                    headers: { Authorization: `Bearer ${token}`, 'Accept': 'application/json', 'Content-Type': 'application/json' }
                 });
-                if (response.data.status_code === 200) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: response.data.message
-                    });
+                if (response.data && response.data.status_code === 200) {
+                    Swal.fire({ icon: 'success', title: 'Success!', text: response.data.message || 'Product removed from cart successfully' });
                     updateCartCount();
                     updateCartView();
-                    // Hide Remove button after removing
                     const addBtn = button.previousElementSibling;
                     if (addBtn && addBtn.classList.contains('add-to-cart')) {
                         button.style.display = 'none';
                     }
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.data.message || 'Failed to remove from cart'
-                    });
+                    Swal.fire({ icon: 'error', title: 'Error', text: response.data.message || 'Failed to remove from cart' });
                 }
             } catch (error) {
                 console.error('Remove from Cart Error:', error.response ? error.response.data : error.message);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred. Please check the console for details.'
-                });
+                Swal.fire({ icon: 'error', title: 'Error', text: 'An error occurred. Please check the console for details.' });
             }
         });
     });
@@ -404,10 +312,10 @@ document.addEventListener('DOMContentLoaded', () => {
             axios.get(`${API_BASE_URL}/cart/count`, {
                 headers: { Authorization: `Bearer ${token}`, 'Accept': 'application/json' }
             }).then(response => {
-                if (response.data.status_code === 200) {
+                if (response.data && response.data.status_code === 200) {
                     const cartCountElement = document.getElementById('cart-count');
                     if (cartCountElement) {
-                        cartCountElement.textContent = response.data.data.count;
+                        cartCountElement.textContent = response.data.count;
                     } else {
                         console.error('Cart count element not found!');
                     }
@@ -426,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
             axios.get(`${API_BASE_URL}/cart/view`, {
                 headers: { Authorization: `Bearer ${token}`, 'Accept': 'application/json' }
             }).then(response => {
-                if (response.data.status_code === 200) {
+                if (response.data && response.data.status_code === 200) {
                     cartItemsList.innerHTML = '';
                     let subtotal = 0;
                     if (response.data.data.length > 0) {
@@ -435,43 +343,42 @@ document.addEventListener('DOMContentLoaded', () => {
                             const quantity = item.quantity || 1;
                             subtotal += price * quantity;
                             cartItemsList.innerHTML += `
-                                <li>
-                                    <div class="cartmini__thumb">
+                                <li class="d-flex align-items-center mb-3">
+                                    <div class="cartmini__thumb me-3">
                                         <a href="product-details.php?id=${item.product_id}">
-                                            <img src="${item.product.image || 'assets/img/banner/sidebar-banner.jpg'}" alt="${item.product.product_name || 'Product'}">
+                                            <img src="${item.product.image || 'assets/img/banner/sidebar-banner.jpg'}" alt="${item.product.product_name || 'Product'}" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
                                         </a>
                                     </div>
-                                    <div class="cartmini__content">
-                                        <h5><a href="product-details.php?id=${item.product_id}">${item.product.product_name || 'Unnamed Product'}</a></h5>
-                                        <div class="product-quantity mt-10 mb-10">${quantity}x</div>
+                                    <div class="cartmini__content flex-grow-1">
+                                        <h5 class="mb-1"><a href="product-details.php?id=${item.product_id}">${item.product.product_name || 'Unnamed Product'}</a></h5>
                                         <div class="product__sm-price-wrapper">
                                             <span>${quantity} <i class="fal fa-times"></i></span>
-                                            <span class="product__sm-price">$${price.toFixed(2)}</span>
+                                            <span class="product__sm-price text-success">$${price.toFixed(2)}</span>
                                         </div>
                                     </div>
-                                    <a href="product-details.php?id=${item.product_id}&remove_cart=${item.product_id}&msg=msg" class="cartmini__del"><i class="fal fa-times"></i></a>
+                                    <a href="product-details.php?id=${item.product_id}&remove_cart=${item.product_id}&msg=msg" class="cartmini__del text-danger"><i class="fal fa-times"></i></a>
                                 </li>
                             `;
                         });
                     } else {
-                        cartItemsList.innerHTML = '<li><p>Cart is empty</p></li>';
+                        cartItemsList.innerHTML = '<li class="text-center py-2">Cart is empty</li>';
                     }
                     cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
                     checkoutBtn.disabled = subtotal === 0;
                 } else {
                     console.error('Failed to fetch cart view:', response.data);
-                    cartItemsList.innerHTML = '<li><p>Failed to load cart</p></li>';
+                    cartItemsList.innerHTML = '<li class="text-center py-2">Failed to load cart</li>';
                     cartSubtotal.textContent = '$0.00';
                     checkoutBtn.disabled = true;
                 }
             }).catch(error => {
                 console.error('Cart View Error:', error.response ? error.response.data : error.message);
-                cartItemsList.innerHTML = '<li><p>Error loading cart</p></li>';
+                cartItemsList.innerHTML = '<li class="text-center py-2">Error loading cart</li>';
                 cartSubtotal.textContent = '$0.00';
                 checkoutBtn.disabled = true;
             });
         } else {
-            cartItemsList.innerHTML = '<li><p>Please log in to view cart</p></li>';
+            cartItemsList.innerHTML = '<li class="text-center py-2">Please log in to view cart</li>';
             cartSubtotal.textContent = '$0.00';
             checkoutBtn.disabled = true;
         }
@@ -492,21 +399,177 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <style>
+:root {
+    --primary-color: #6f42c1;
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --text-color: #333;
+    --font-family: 'Helvetica', 'Arial', sans-serif;
+    --bg-gray: #f8f9fa;
+}
+
+.bg-shape img {
+    width: 100%;
+    height: auto;
+    opacity: 0.1;
+}
+
+.page__title-area {
+    background: linear-gradient(90deg, #6f42c1, #8e6de6);
+    padding: 60px 0;
+}
+
+.page__title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.breadcrumb {
+    background: transparent;
+}
+
+.breadcrumb-item a, .breadcrumb-item.active {
+    color: inherit;
+    text-decoration: none;
+}
+
+.product__area {
+    padding: 60px 0;
+}
+
+.product__image-wrapper {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.product__main-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product__main-image img:hover {
+    transform: scale(1.05);
+}
+
+.product__details-sidebar {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.product__title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.product__price {
+    font-size: 1.5rem;
+}
+
+.product__actions .m-btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.product__actions .m-btn:hover {
+    background-color: darken(var(--primary-color), 10%);
+}
+
+.trending__area {
+    padding: 60px 0;
+    background-color: var(--bg-gray);
+}
+
+.trending__item {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.trending__item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.trending__title {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.trending__meta {
+    margin-top: 10px;
+}
+
+.subscribe__area {
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    color: white;
+}
+
+.subscribe__area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 0;
+}
+
+.subscribe__content {
+    position: relative;
+    z-index: 1;
+}
+
+.subscribe__title {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.m-btn-black {
+    background-color: #000;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.m-btn-black:hover {
+    background-color: #333;
+}
+
 .cartmini__wrapper {
     display: none;
     position: fixed;
     top: 10px;
     right: 10px;
-    width: 300px;
+    width: 320px;
     background: #fff;
     border: 1px solid #ddd;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
     z-index: 1000;
     padding: 15px;
+    border-radius: 8px;
 }
+
 .cartmini__wrapper.opened {
     display: block;
 }
+
 .cartmini__close-btn {
     background: none;
     border: none;
@@ -514,26 +577,51 @@ document.addEventListener('DOMContentLoaded', () => {
     cursor: pointer;
     float: right;
 }
+
 .cartmini__del {
-    color: red;
+    color: var(--error-color);
     cursor: pointer;
     font-size: 18px;
 }
+
 .m-btn-3 {
-    background: #6f42c1;
+    background: var(--primary-color);
     color: #fff;
     padding: 10px;
     text-align: center;
     border: none;
     cursor: pointer;
     width: 100%;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
+
 .m-btn-3:hover {
-    background: #5a2d9e;
+    background: darken(var(--primary-color), 10%);
 }
+
 .m-btn-3:disabled {
     background: #ccc;
     cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .product__main-image img {
+        height: 300px;
+    }
+    .product__details-sidebar {
+        margin-top: 20px;
+    }
+    .cartmini__wrapper {
+        width: 90%;
+        right: 5%;
+    }
+    .trending__item {
+        margin-bottom: 20px;
+    }
+    .subscribe__title {
+        font-size: 1.5rem;
+    }
 }
 </style>
 </body>
